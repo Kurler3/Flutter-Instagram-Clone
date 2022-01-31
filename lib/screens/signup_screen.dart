@@ -1,20 +1,26 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:instagram_flutter/resources/auth_methods.dart';
 import 'package:instagram_flutter/utils/colors.dart';
+import 'package:instagram_flutter/utils/utils.dart';
 import 'package:instagram_flutter/widgets/text_field_input.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignUpScreenScreenState createState() => _SignUpScreenScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  Uint8List? _image;
 
   @override
   void dispose() {
@@ -23,6 +29,19 @@ class _LoginScreenState extends State<LoginScreen> {
     // Dispose of the text editing controllers
     _emailController.dispose();
     _passwordController.dispose();
+    _bioController.dispose();
+    _usernameController.dispose();
+  }
+
+  void selectImage() async {
+    // Pick the image
+    Uint8List? imagePicked = await pickImage(ImageSource.gallery);
+
+    if (imagePicked != null) {
+      setState(() {
+        _image = imagePicked;
+      });
+    }
   }
 
   @override
@@ -53,6 +72,47 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 64,
               ),
+              GestureDetector(
+                onTap: selectImage,
+                child: Stack(
+                  children: [
+                    // If user picked an image, then show it instead of the default one
+                    _image != null
+                        ? CircleAvatar(
+                            radius: 64.0,
+                            // MemoryImage takes a Uint8List as the image
+                            backgroundImage: MemoryImage(_image!),
+                            backgroundColor: Colors.transparent,
+                          )
+                        : const CircleAvatar(
+                            radius: 64.0,
+                            backgroundImage: NetworkImage(
+                                'https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg'),
+                            backgroundColor: Colors.transparent,
+                          ),
+                    Positioned(
+                      left: 80,
+                      bottom: -15,
+                      child: IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.add_a_photo),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              // Text Field Input for username
+              TextFieldInput(
+                textEditingController: _usernameController,
+                hintText: 'Enter your username',
+                textInputType: TextInputType.text,
+              ),
+              const SizedBox(
+                height: 24.0,
+              ),
               // Text Field for email
               TextFieldInput(
                 textEditingController: _emailController,
@@ -72,10 +132,28 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 20,
               ),
+              // Text Field Input for bio
+              TextFieldInput(
+                textEditingController: _bioController,
+                hintText: 'Enter your bio',
+                textInputType: TextInputType.text,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
               // Login button
               InkWell(
+                onTap: () async {
+                  AuthMethods().signUpUser(
+                    email: _emailController.text.trim(),
+                    password: _passwordController.text.trim(),
+                    username: _usernameController.text.trim(),
+                    bio: _bioController.text.trim(),
+                    // avatar: ,
+                  );
+                },
                 child: Container(
-                  child: const Text('Log in'),
+                  child: const Text('Sign Up'),
                   width: double.infinity,
                   alignment: Alignment.center,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -101,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    child: const Text("Don't have an account?"),
+                    child: const Text("Already have an account?"),
                     padding: const EdgeInsets.symmetric(vertical: 12.0),
                   ),
                   GestureDetector(
@@ -110,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Container(
                       child: const Text(
-                        "Sign up",
+                        "Sign In",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
