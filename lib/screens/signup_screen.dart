@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_flutter/resources/auth_methods.dart';
+import 'package:instagram_flutter/screens/login_screen.dart';
 import 'package:instagram_flutter/utils/colors.dart';
 import 'package:instagram_flutter/utils/utils.dart';
 import 'package:instagram_flutter/widgets/text_field_input.dart';
@@ -21,6 +22,8 @@ class _SignUpScreenScreenState extends State<SignUpScreen> {
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   Uint8List? _image;
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -42,6 +45,34 @@ class _SignUpScreenScreenState extends State<SignUpScreen> {
         _image = imagePicked;
       });
     }
+  }
+
+  void signUpUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    String res = await AuthMethods().signUpUser(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+      username: _usernameController.text.trim(),
+      bio: _bioController.text.trim(),
+      avatar: _image,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (res != 'Success') {
+      // Show snackbar showing error
+      showSnackBar(res, context);
+    }
+  }
+
+  void navigateToLoginScreen() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const LoginScreen()));
   }
 
   @override
@@ -141,19 +172,17 @@ class _SignUpScreenScreenState extends State<SignUpScreen> {
               const SizedBox(
                 height: 20,
               ),
-              // Login button
+              // Sign Up button
               InkWell(
-                onTap: () async {
-                  AuthMethods().signUpUser(
-                    email: _emailController.text.trim(),
-                    password: _passwordController.text.trim(),
-                    username: _usernameController.text.trim(),
-                    bio: _bioController.text.trim(),
-                    // avatar: ,
-                  );
-                },
+                onTap: signUpUser,
                 child: Container(
-                  child: const Text('Sign Up'),
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                          ),
+                        )
+                      : const Text('Sign Up'),
                   width: double.infinity,
                   alignment: Alignment.center,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -183,9 +212,7 @@ class _SignUpScreenScreenState extends State<SignUpScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 12.0),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      debugPrint('sign up');
-                    },
+                    onTap: navigateToLoginScreen,
                     child: Container(
                       child: const Text(
                         "Sign In",

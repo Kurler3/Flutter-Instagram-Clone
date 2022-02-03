@@ -13,3 +13,16 @@ pickImage(ImageSource source) async {
   // If no image was selected
   debugPrint('No Image selected');
 }
+
+// Function that shows snackbar
+
+showSnackBar(String content, BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        content,
+        maxLines: 2,
+      ),
+    ),
+  );
+}

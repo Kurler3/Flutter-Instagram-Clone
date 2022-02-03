@@ -3,10 +3,27 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:instagram_flutter/models/user.dart' as model;
+import 'package:instagram_flutter/resources/storage_methods.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Stream of user
+  Stream<User?> get userStream => _auth.userChanges();
+
+  // Get user details
+  Future<model.User> getUserDetails() async {
+    // Provided by firebase
+    User currentUser = _auth.currentUser!;
+
+    DocumentSnapshot snapshot =
+        await _firestore.collection('users').doc(currentUser.uid).get();
+
+    // Transform the snapshot data to model.User class.
+    return model.User.fromSnapshot(snapshot);
+  }
 
   // Sign up user func
   Future<String> signUpUser({
@@ -14,7 +31,7 @@ class AuthMethods {
     required String password,
     required String username,
     required String bio,
-    // required Uint8List avatar,
+    required Uint8List? avatar,
   }) async {
     String res = 'Some error occurred';
     try {
@@ -26,24 +43,79 @@ class AuthMethods {
         UserCredential creds = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
 
+        String? avatarUrl;
+        if (avatar != null) {
+          // Store avatar in storage
+          avatarUrl = await StorageMethods()
+              .uploadImageToStorage('profilePics', avatar, false);
+        }
+
+        model.User user = model.User(
+          username: username,
+          uid: creds.user!.uid,
+          email: email,
+          bio: bio,
+          followers: [],
+          following: [],
+          photoUrl: avatarUrl,
+        );
+
         // Store in db username, bio, avatar
-        await _firestore.collection('users').doc(creds.user!.uid).set({
-          'username': username,
-          'uid': creds.user!.uid,
-          'email': email,
-          'bio': bio,
-          // Will be a list of uids of other users
-          'followers': [],
-          'following': [],
-        });
+        await _firestore
+            .collection('users')
+            .doc(creds.user!.uid)
+            .set(user.toJson());
 
         res = 'Success';
       }
+    } on FirebaseAuthException catch (err) {
+      res = err.code;
     } catch (e) {
       debugPrint(e.toString());
       res = e.toString();
     }
 
+    return res;
+  }
+
+  // Sign in
+  Future<String> signIn(String email, String password) async {
+    String res = 'Some error accurred';
+    try {
+      if (email.isNotEmpty && password.isNotEmpty) {
+        await _auth.signInWithEmailAndPassword(
+            email: email, password: password);
+
+        res = 'Success';
+      } else {
+        res = 'Please enter all the fields';
+      }
+    } on FirebaseAuthException catch (err) {
+      debugPrint(err.code);
+      res = err.code;
+    } catch (e) {
+      debugPrint(e.toString());
+      res = e.toString();
+    }
+
+    return res;
+  }
+
+  // Sign out
+
+  Future<String> signOut() async {
+    String res = 'Some error occurred';
+    try {
+      await _auth.signOut();
+
+      res = 'Success';
+    } on FirebaseAuthException catch (err) {
+      debugPrint(err.code);
+      res = err.code;
+    } catch (e) {
+      debugPrint(e.toString());
+      res = e.toString();
+    }
     return res;
   }
 }
