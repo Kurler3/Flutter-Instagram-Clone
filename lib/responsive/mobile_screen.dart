@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_flutter/resources/auth_methods.dart';
+import 'package:instagram_flutter/screens/add_post_screen.dart';
 import 'package:instagram_flutter/utils/colors.dart';
+import 'package:instagram_flutter/utils/global_variables.dart';
 import 'package:instagram_flutter/utils/utils.dart';
 
 class MobileScreen extends StatefulWidget {
@@ -28,15 +30,11 @@ class _MobileScreenState extends State<MobileScreen> {
     pageController.dispose();
   }
 
-  void signOutUser() async {
-    String res = await AuthMethods().signOut();
+  // void signOutUser() async {
+  //   String res = await AuthMethods().signOut();
 
-    if (res != 'Success') {
-      showSnackBar(res, context);
-    } else if (res == 'Success') {
-      showSnackBar("Signed out!", context);
-    }
-  }
+  //   showSnackBar(res == 'Success' ? 'Signed out!' : res, context);
+  // }
 
   void onBottomNavigationTapped(int value) {
     pageController.jumpToPage(value);
@@ -52,27 +50,11 @@ class _MobileScreenState extends State<MobileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(onPressed: signOutUser, icon: const Icon(Icons.logout))
-        ],
-      ),
       body: PageView(
         physics: const NeverScrollableScrollPhysics(),
         controller: pageController,
         onPageChanged: onPageChanged,
-        children: [
-          // Home
-          Text('feed'),
-          // Search
-          Text('Search'),
-          // Add
-          Text('Add'),
-          // Favorites
-          Text('Favorites'),
-          // Profile
-          Text('Profile'),
-        ],
+        children: homeScreenItems,
       ),
       bottomNavigationBar: CupertinoTabBar(
         onTap: onBottomNavigationTapped,
