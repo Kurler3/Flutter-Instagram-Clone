@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
@@ -18,7 +20,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -42,14 +44,32 @@ class MyApp extends StatelessWidget {
         home: StreamBuilder<User?>(
           stream: AuthMethods().userStream,
           builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              // If the user is logged in
-              return const ResponsiveLayout(
-                  webScreenLayout: WebScreen(),
-                  mobileScreenLayout: MobileScreen());
+            if (snapshot.connectionState == ConnectionState.active ||
+                snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return const Text('Error');
+              } else if (snapshot.hasData) {
+                // If the user is logged in
+                return const ResponsiveLayout(
+                    webScreenLayout: WebScreen(),
+                    mobileScreenLayout: MobileScreen());
+              } else {
+                return const LoginScreen();
+              }
             } else {
-              return const LoginScreen();
+              return const Center(child: CircularProgressIndicator());
             }
+
+            // debugPrint('Snapshot data: ${snapshot.hasData} ${snapshot.data}');
+
+            // if (snapshot.hasData) {
+            //   // If the user is logged in
+            //   return const ResponsiveLayout(
+            //       webScreenLayout: WebScreen(),
+            //       mobileScreenLayout: MobileScreen());
+            // } else {
+            //   return const LoginScreen();
+            // }
           },
         ),
       ),

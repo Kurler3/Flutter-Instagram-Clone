@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:instagram_flutter/screens/add_post_screen.dart';
+import 'package:instagram_flutter/screens/feed_screen.dart';
+import 'package:instagram_flutter/screens/search_screen.dart';
+import 'package:instagram_flutter/utils/colors.dart';
 
 const webScreenSize = 600;
 
 const homeScreenItems = [
   // Home
-  Text('feed'),
+  FeedScreen(),
   // Search
-  Text('Search'),
+  SearchScreen(),
   // Add
   AddPostScreen(),
   // Favorites
@@ -18,3 +21,23 @@ const homeScreenItems = [
 
 const defaultProfilePicUrl =
     'https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg';
+
+// Post dialog options shown when user clicks in 3 dots icon button on the feed page
+
+// const POST_3_ICONS_OPTIONS = [
+//   {
+//     'value': 'Edit',
+//     'color': primaryColor,
+//     'backgroundColor': Colors.green,
+//   },
+//   {
+//     'value': 'Delete',
+//     'color': primaryColor,
+//     'backgroundColor': Colors.red,
+//   },
+//   {
+//     'value': 'Close',
+//     'color': primaryColor,
+//     'backgroundColor': Colors.black,
+//   },
+// ];

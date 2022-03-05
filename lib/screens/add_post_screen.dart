@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_flutter/models/user.dart';
 import 'package:instagram_flutter/providers/user_provider.dart';
+import 'package:instagram_flutter/resources/firestore_methods.dart';
 import 'package:instagram_flutter/utils/colors.dart';
 import 'package:instagram_flutter/utils/global_variables.dart';
 import 'package:instagram_flutter/utils/utils.dart';
@@ -20,6 +21,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
   // Image picked
   Uint8List? _filePicked;
 
+  bool _isLoading = false;
+
   // Text editing controller for the post description
   final TextEditingController _descriptionController = TextEditingController();
 
@@ -30,7 +33,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
       context: context,
       builder: (context) {
         return SimpleDialog(
-          title: const Text('Create a Post'),
+          title: const Text(
+            'Create a Post',
+            textAlign: TextAlign.center,
+          ),
           children: [
             // Camera Option
             SimpleDialogOption(
@@ -82,6 +88,49 @@ class _AddPostScreenState extends State<AddPostScreen> {
     );
   }
 
+  // Gets called when user clicks on post image text
+  void postImage({
+    required String uid,
+    required String username,
+    required String profImage,
+  }) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      String res = await FirestoreMethods().uploadPost(
+          description: _descriptionController.text,
+          file: _filePicked!,
+          uid: uid,
+          username: username,
+          profImage: profImage);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (res == 'Success') {
+        showSnackBar('Posted!', context);
+
+        // Set selectedFile back to null.
+        setState(() {
+          _filePicked = null;
+        });
+      } else {
+        showSnackBar(res, context);
+      }
+    } catch (e) {
+      showSnackBar(e.toString(), context);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _descriptionController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get user data for displaying the profile avatar
@@ -125,19 +174,25 @@ class _AddPostScreenState extends State<AddPostScreen> {
               // Confirm post btn
               actions: [
                 TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Post',
-                      style: TextStyle(
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ))
+                  onPressed: () => postImage(
+                      username: user.username,
+                      uid: user.uid,
+                      profImage: user.photoUrl ?? defaultProfilePicUrl),
+                  child: const Text(
+                    'Post',
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ],
             ),
             body: Column(
               children: [
+                // If its loading, show a linear progress indicator
+                _isLoading ? const LinearProgressIndicator() : Container(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,7 +236,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     ),
                   ],
                 ),
-                const Divider(),
               ],
             ),
           );

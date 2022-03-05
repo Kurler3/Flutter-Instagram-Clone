@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:instagram_flutter/models/user.dart' as model;
 import 'package:instagram_flutter/resources/storage_methods.dart';
+import 'package:instagram_flutter/utils/global_variables.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Stream of user
-  Stream<User?> get userStream => _auth.userChanges();
+  Stream<User?> get userStream => _auth.authStateChanges();
 
   // Get user details
   Future<model.User> getUserDetails() async {
@@ -47,17 +48,17 @@ class AuthMethods {
         if (avatar != null) {
           // Store avatar in storage
           avatarUrl = await StorageMethods()
-              .uploadImageToStorage('profilePics', avatar, false);
+              .uploadImageToStorage('profilePics', avatar, false, null);
         }
 
         model.User user = model.User(
-          username: username,
+          username: username.toLowerCase(),
           uid: creds.user!.uid,
           email: email,
           bio: bio,
           followers: [],
           following: [],
-          photoUrl: avatarUrl,
+          photoUrl: avatarUrl ?? defaultProfilePicUrl,
         );
 
         // Store in db username, bio, avatar

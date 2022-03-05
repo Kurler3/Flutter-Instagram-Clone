@@ -45,4 +45,14 @@ class User {
       following: snapshotData['following'],
     );
   }
+
+  static User fromMap(Map<String, dynamic> map) => User(
+        email: map['email'],
+        uid: map['uid'],
+        photoUrl: map['photoUrl'],
+        username: map['username'],
+        bio: map['bio'],
+        followers: map['followers'],
+        following: map['following'],
+      );
 }
