@@ -160,4 +160,11 @@ class FirestoreMethods {
           .collection('users')
           .where('username', arrayContains: input)
           .get();
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getPostsFromUser(
+          String userId) async =>
+      await _firestore
+          .collection('posts')
+          .where('uid', isEqualTo: userId)
+          .get();
 }

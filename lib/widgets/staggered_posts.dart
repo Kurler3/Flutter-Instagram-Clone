@@ -34,32 +34,33 @@ class _StaggeredPostsState extends State<StaggeredPosts> {
                       crossAxisCount: 3,
                       mainAxisSpacing: 2,
                       crossAxisSpacing: 2,
-                      axisDirection: AxisDirection.up,
+                      axisDirection: AxisDirection.down,
                       children: snapshot.data!.docs.map((doc) {
                         Post post = Post.fromSnapshot(doc);
 
-                        int index = snapshot.data!.docs.indexOf(doc);
+                        int index = snapshot.data!.docs.indexWhere((document) =>
+                            document.data()['postId'] == post.postId);
 
                         return StaggeredGridTile.count(
                           key: Key('search-screen-post-item-${post.postId}'),
-                          crossAxisCellCount: (index * 4) % 2 == 0 ? 1 : 2,
-                          mainAxisCellCount: (index * 3) % 2 == 0 ? 1 : 2,
-                          // child: GestureDetector(
-                          //   onTap: () {
-                          //     // Go to specific post screen
-                          //     Navigator.of(context).push(MaterialPageRoute(
-                          //         builder: (BuildContext context) =>
-                          //             PostScreen(post: post)));
-                          //   },
-                          //   child: Image.network(
-                          //     post.postUrl,
-                          //     fit: BoxFit.cover,
-                          //   ),
-                          // ),
-                          child: Image.network(
-                            post.postUrl,
-                            fit: BoxFit.fill,
+                          crossAxisCellCount: (index % 7) == 0 ? 2 : 1,
+                          mainAxisCellCount: (index % 7) == 0 ? 2 : 1,
+                          child: GestureDetector(
+                            onTap: () {
+                              // Go to specific post screen
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      PostScreen(post: post)));
+                            },
+                            child: Image.network(
+                              post.postUrl,
+                              fit: BoxFit.fill,
+                            ),
                           ),
+                          // child: Image.network(
+                          //   post.postUrl,
+                          //   fit: BoxFit.fill,
+                          // ),
                         );
                       }).toList(),
                     )

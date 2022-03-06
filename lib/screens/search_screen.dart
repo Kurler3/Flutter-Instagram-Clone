@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_flutter/models/user.dart';
 import 'package:instagram_flutter/resources/firestore_methods.dart';
+import 'package:instagram_flutter/screens/profile_screen.dart';
 import 'package:instagram_flutter/utils/colors.dart';
 import 'package:instagram_flutter/utils/global_variables.dart';
 import 'package:instagram_flutter/widgets/staggered_posts.dart';
@@ -104,6 +105,15 @@ class _SearchScreenState extends State<SearchScreen> {
                                       defaultProfilePicUrl),
                             ),
                             title: Text(userSearched.username),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ProfileScreen(
+                                    user: userSearched,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         });
                   } else {
